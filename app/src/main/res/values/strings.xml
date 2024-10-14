@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">SurveyHeartQuizTest</string>
+    <string name="start_quiz_str">Start Quiz</string>
+    <string name="high_score_str">High Score: %d</string>
+    <string name="show_questionnaire_str">Question will appear here</string>
+    <string name="submit_answer_str">Submit Answer</string>
+    <string name="retry_quiz_str">Retry Quiz</string>
+    <string name="home_str">Home</string>
 </resources>

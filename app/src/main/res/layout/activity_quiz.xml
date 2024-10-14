@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".QuizActivity">
+
+<!--
+    <ProgressBar
+        android:id="@+id/progress_circular"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone"
+        />
+-->
+
+    <TextView
+        android:id="@+id/timerTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        tools:text="5"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/question_txtView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="20dp"
+        android:text="@string/show_questionnaire_str"
+        android:textSize="18sp" />
+
+    <RadioGroup
+        android:id="@+id/answers_radioGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/rbOptn1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Option 1" />
+
+        <RadioButton
+            android:id="@+id/rbOptn2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Option 2" />
+
+        <RadioButton
+            android:id="@+id/rbOptn3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Option 3" />
+
+        <RadioButton
+            android:id="@+id/rbOptn4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Option 4" />
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/submitBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/submit_answer_str" />
+
+</LinearLayout>
