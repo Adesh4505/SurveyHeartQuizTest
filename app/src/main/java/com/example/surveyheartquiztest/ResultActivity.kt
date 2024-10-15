@@ -25,8 +25,9 @@ class ResultActivity : AppCompatActivity() {
             setResult(Activity.RESULT_OK)
         }
 
-        binding.scoreTxtView.text = "Your Score: $score"
-        binding.highScoreTxtView.text = "High Score: ${preferenceManager.loadHighScore()}"
+        binding.scoreTxtView.text = getString(R.string.your_score, score)
+        binding.highScoreTxtView.text = getString(R.string.high_score, preferenceManager.loadHighScore())
+
 
         binding.retryBtn.setOnClickListener {
             val intent = Intent(this, QuizActivity::class.java)

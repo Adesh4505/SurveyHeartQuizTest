@@ -6,4 +6,7 @@
     <string name="submit_answer_str">Submit Answer</string>
     <string name="retry_quiz_str">Retry Quiz</string>
     <string name="home_str">Home</string>
+    <string name="initial_timer_value">30</string>
+    <string name="your_score">Your Score: %1$d</string>
+    <string name="high_score">High Score: %1$d</string>
 </resources>

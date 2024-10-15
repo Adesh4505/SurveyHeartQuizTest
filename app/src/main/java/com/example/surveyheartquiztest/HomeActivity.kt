@@ -30,9 +30,10 @@ class HomeActivity : AppCompatActivity() {
 
                 if (score > highScore) {
                     preferenceManager.saveHighScore(score)
-                    binding.highScoreTxtView.text = "High Score: $score"
+                    binding.highScoreTxtView.text = getString(R.string.high_score, score)
+
                 } else {
-                    binding.highScoreTxtView.text = "High Score: $highScore"
+                    binding.highScoreTxtView.text = getString(R.string.high_score, highScore)
                 }
             }
         }
@@ -41,7 +42,7 @@ class HomeActivity : AppCompatActivity() {
             val intent = Intent(this@HomeActivity, QuizActivity::class.java)
             quizActivityLauncher.launch(intent)
         }
-        binding.highScoreTxtView.text = "High Score: ${preferenceManager.loadHighScore()}"
+        binding.highScoreTxtView.text = getString(R.string.high_score, preferenceManager.loadHighScore())
 
     }
 }

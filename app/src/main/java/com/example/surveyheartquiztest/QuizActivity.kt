@@ -47,6 +47,9 @@ class QuizActivity : AppCompatActivity() {
 
         questionRepository = QuestionRepository(QuizDb.getDatabase(this).questionDao())
 
+        binding.progressBar.visibility = View.VISIBLE
+        binding.timerTextView.text = getString(R.string.initial_timer_value)
+
         if (savedInstanceState != null) {
             restoreSavedState(savedInstanceState)
         } else {
@@ -102,7 +105,6 @@ class QuizActivity : AppCompatActivity() {
                     val questions = response.body()?.results ?: emptyList()
 
                     lifecycleScope.launch {
-                        // Clear old questions and insert new ones
                         questionRepository.clearQuestions()
                         val questionEntities = questions.map { question ->
                             QuestionEntity(
@@ -119,15 +121,18 @@ class QuizActivity : AppCompatActivity() {
                     if (!isQuizActive) {
                         startTimer()
                     }
+                    binding.progressBar.visibility = View.GONE
+                    startTimer()
                 } else {
                     Toast.makeText(this@QuizActivity, "Failed to fetch questions.", Toast.LENGTH_SHORT).show()
-                    loadQuestionsFromDatabase() // Try loading from Room on failure
+                    loadQuestionsFromDatabase()
                 }
             }
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+                binding.progressBar.visibility = View.GONE
                 Toast.makeText(this@QuizActivity, "API Error: ${t.message}", Toast.LENGTH_SHORT).show()
-                loadQuestionsFromDatabase() // Load from Room if API fails
+                loadQuestionsFromDatabase()
             }
         })
     }
@@ -142,7 +147,10 @@ class QuizActivity : AppCompatActivity() {
                 shuffle()
             }
 
+            binding.progressBar.visibility = View.GONE
+            binding.answersRadioGroup.visibility = View.VISIBLE
             binding.answersRadioGroup.clearCheck()
+
             binding.answersRadioGroup.children.forEachIndexed { index, view ->
                 val radioButton = view as RadioButton
                 radioButton.text = if (index < allOptions.size) allOptions[index] else ""

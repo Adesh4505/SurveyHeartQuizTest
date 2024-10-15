@@ -13,8 +13,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
-        tools:text="5"
-        android:textSize="24sp"
+        tools:text="30"
+        android:textSize="50sp"
         android:textStyle="bold" />
 
     <TextView
@@ -22,13 +22,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="20dp"
-        android:text="@string/show_questionnaire_str"
+        tools:text="@string/show_questionnaire_str"
         android:textSize="18sp" />
 
     <RadioGroup
         android:id="@+id/answers_radioGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:orientation="vertical">
 
         <RadioButton
@@ -62,5 +63,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:text="@string/submit_answer_str" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
 
 </LinearLayout>
