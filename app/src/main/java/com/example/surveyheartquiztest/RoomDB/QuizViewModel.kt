@@ -24,6 +24,12 @@ class QuizViewModel(private val repository: QuestionRepository) : ViewModel() {
         }
     }
 
+    /*fun getUniqueQuestions(questions: List<QuestionEntity>) {
+        viewModelScope.launch {
+            repository.getUniqueQuestions()
+        }
+    }*/
+
     fun clearQuestions() {
         viewModelScope.launch {
             repository.clearQuestions()

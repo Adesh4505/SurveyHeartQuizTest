@@ -11,6 +11,10 @@ class QuestionRepository(private val questionDao: QuestionDao) {
         return questionDao.getAllQuestions()
     }
 
+    fun getUniqueQuestions(): List<String> {
+        return questionDao.getUniqueQuestions()
+    }
+
     suspend fun clearQuestions() {
         questionDao.clearQuestions()
     }
