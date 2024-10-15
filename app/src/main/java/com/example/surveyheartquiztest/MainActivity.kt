@@ -8,6 +8,7 @@ import android.os.Looper
 import com.example.surveyheartquiztest.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityMainBinding
     private lateinit var preferenceManager: PreferenceManager
 
@@ -19,13 +20,10 @@ class MainActivity : AppCompatActivity() {
         preferenceManager = PreferenceManager(this@MainActivity)
 
         Handler(Looper.getMainLooper()).postDelayed({
-            navigateToHome()
-        }, 3000)
-    }
+            val intent = Intent(this@MainActivity, HomeActivity::class.java)
+            startActivity(intent)
+            finish()
+        },3000)
 
-    private fun navigateToHome() {
-        val intent = Intent(this@MainActivity, HomeActivity::class.java)
-        startActivity(intent)
-        finish()
     }
 }

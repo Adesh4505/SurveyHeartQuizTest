@@ -1,25 +1,34 @@
+package com.example.surveyheartquiztest
+
+import com.example.surveyheartquiztest.RoomDB.QuestionEntity
 import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.View
 import android.widget.RadioButton
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.surveyheartquiztest.API.ApiResponse
 import com.example.surveyheartquiztest.API.ApiService
 import com.example.surveyheartquiztest.API.Question
 import com.example.surveyheartquiztest.API.RetrofitClient
-import com.example.surveyheartquiztest.ResultActivity
+import com.example.surveyheartquiztest.RoomDB.QuestionRepository
+import com.example.surveyheartquiztest.RoomDB.QuizDb
+import com.example.surveyheartquiztest.RoomDB.QuizViewModel
 import com.example.surveyheartquiztest.databinding.ActivityQuizBinding
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.util.*
+import java.util.Locale
 
 class QuizActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityQuizBinding
     private lateinit var questions: List<Question>
     private var currentQuestionIndex = 0
@@ -27,6 +36,9 @@ class QuizActivity : AppCompatActivity() {
     private lateinit var timer: CountDownTimer
     private var timeLeftInMillis: Long = 30000
     private var isQuizActive: Boolean = false
+//    private lateinit var quizViewModel: QuizViewModel
+    private lateinit var questionRepository: QuestionRepository
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,35 +46,81 @@ class QuizActivity : AppCompatActivity() {
         binding = ActivityQuizBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Restore previous state if available
+        questionRepository = QuestionRepository(QuizDb.getDatabase(this).questionDao())
+
+//        quizViewModel = ViewModelProvider(this)[QuizViewModel::class.java]
+
         if (savedInstanceState != null) {
-            restoreState(savedInstanceState)
+            restoreSavedState(savedInstanceState)
         } else {
-            fetchQuestions()
+            loadQuestions()
         }
 
+//        binding.progressCircular.visibility = View.VISIBLE
+
+        binding.submitBtn.isEnabled = false
         binding.submitBtn.setOnClickListener {
             checkAnswer()
         }
     }
 
-    private fun restoreState(savedInstanceState: Bundle) {
-        currentQuestionIndex = savedInstanceState.getInt("CURRENT_QUESTION_INDEX", 0)
-        score = savedInstanceState.getInt("SCORE", 0)
-        timeLeftInMillis = savedInstanceState.getLong("TIME_LEFT_IN_MILLIS", 30000)
-        isQuizActive = savedInstanceState.getBoolean("IS_QUIZ_ACTIVE", false)
+    override fun onBackPressed() {
+        timer.cancel()
+        finish()
+    }
 
-        // Restore questions using Gson
-        val gson = Gson()
-        val json = savedInstanceState.getString("QUESTIONS")
-        val type = object : TypeToken<List<Question>>() {}.type
-        questions = gson.fromJson(json, type)
+    override fun onDestroy() {
+        super.onDestroy()
+        if(::timer.isInitialized){
+            timer.cancel()
+        }
+        isQuizActive = false
+    }
 
-        // Display question if available
-        if (questions.isNotEmpty()) {
-            displayQuestion()
-            if (!isQuizActive) {
+    /*private fun fetchQuestionsfromRoom() {
+        lifecycleScope.launch {
+            val questionDao = QuizDb.getDatabase(this@QuizActivity).questionDao()
+            val savedQuestions = questionDao.getAllQuestions()
+
+            if (savedQuestions.isNotEmpty()) {
+                questions = savedQuestions.map {
+                    Question(
+                        question = it.question,
+                        correct_answer = it.correctAnswer,
+                        incorrect_answers = Gson().toJson(it.incorrectAnswers)
+                    )
+                }
+                displayQuestion()
                 startTimer()
+            } else {
+                fetchQuestions()
+            }
+        }
+    }*/
+
+    private fun loadQuestions() {
+        lifecycleScope.launch {
+            val questions = questionRepository.getAllQuestions()
+
+            if (questions.isEmpty()) {
+                fetchQuestions()
+            } else {
+                val questionsList = questions.map { questionEntity ->
+                    Question(
+                        category = "",
+                        type = "",
+                        difficulty = "",
+                        question = questionEntity.question,
+                        correct_answer = questionEntity.correctAnswer,
+                        incorrect_answers = questionEntity.incorrectAnswers.split(",")
+                    )
+                }
+
+                this@QuizActivity.questions = questionsList
+                displayQuestion()
+                if (!isQuizActive) {
+                    startTimer()
+                }
             }
         }
     }
@@ -73,50 +131,102 @@ class QuizActivity : AppCompatActivity() {
         call.enqueue(object : Callback<ApiResponse> {
             override fun onResponse(call: Call<ApiResponse>, response: Response<ApiResponse>) {
                 if (response.isSuccessful) {
-                    questions = response.body()?.results ?: emptyList()
-                    if (questions.isNotEmpty()) {
-                        displayQuestion()
-                        if (!isQuizActive) {
-                            startTimer()
+                    val questions = response.body()?.results ?: emptyList()
+
+                    lifecycleScope.launch {
+                        questionRepository.clearQuestions()
+                        val questionEntities = questions.map { question ->
+                            QuestionEntity(
+                                question = question.question,
+                                correctAnswer = question.correct_answer,
+                                incorrectAnswers = question.incorrect_answers.joinToString(",")
+                            )
                         }
-                    } else {
-                        Toast.makeText(this@QuizActivity, "No questions available.", Toast.LENGTH_SHORT).show()
+                        questionRepository.insertQuestions(questionEntities)
+                    }
+
+                    this@QuizActivity.questions = questions
+                    displayQuestion()
+                    if (!isQuizActive) {
+                        startTimer()
                     }
                 } else {
-                    Toast.makeText(this@QuizActivity, "Failed to fetch questions.", Toast.LENGTH_SHORT).show()
+                    lifecycleScope.launch {
+                        val questions = questionRepository.getAllQuestions()
+
+                        if (questions.isEmpty()) {
+                            Toast.makeText(this@QuizActivity, "No questions available.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            val questionsList = questions.map { questionEntity ->
+                                Question(
+                                    category = "",
+                                    type = "",
+                                    difficulty = "",
+                                    question = questionEntity.question,
+                                    correct_answer = questionEntity.correctAnswer,
+                                    incorrect_answers = questionEntity.incorrectAnswers.split(",")
+                                )
+                            }
+
+                            this@QuizActivity.questions = questionsList
+                            displayQuestion()
+                            if (!isQuizActive) {
+                                startTimer()
+                            }
+                        }
+                    }
                 }
             }
 
             override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
-                Toast.makeText(this@QuizActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch {
+                    val questions = questionRepository.getAllQuestions()
+
+                    if (questions.isEmpty()) {
+                        Toast.makeText(this@QuizActivity, "No questions available.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        val questionsList = questions.map { questionEntity ->
+                            Question(
+                                category = "",
+                                type = "",
+                                difficulty = "",
+                                question = questionEntity.question,
+                                correct_answer = questionEntity.correctAnswer,
+                                incorrect_answers = questionEntity.incorrectAnswers.split(",")
+                            )
+                        }
+
+                        this@QuizActivity.questions = questionsList
+                        displayQuestion()
+                        if (!isQuizActive) {
+                            startTimer()
+                        }
+                    }
+                }
             }
         })
     }
 
-    private fun startTimer() {
-        if (!isQuizActive) {
-            isQuizActive = true
-            timer = object : CountDownTimer(timeLeftInMillis, 1000) {
-                override fun onTick(millisUntilFinished: Long) {
-                    timeLeftInMillis = millisUntilFinished
-                    updateTimer()
-                }
+    /*private fun saveQuestionsToDatabase(fetchedQuestions: List<Question>) {
+        val questionDao = QuizDb.getDatabase(this@QuizActivity).questionDao()
 
-                override fun onFinish() {
-                    endQuiz()
-                }
-            }.start()
+        val questionEntities = fetchedQuestions.map {
+            QuestionEntity(
+                question = it.question,
+                correctAnswer = it.correct_answer,
+                incorrectAnswers = Gson().toJson(it.incorrect_answers)
+            )
+        }
+
+        lifecycleScope.launch {
+            questionDao.clearQuestions() // Clear old questions
+            questionDao.insertQuestions(questionEntities) // Insert new questions
         }
     }
-
-    private fun updateTimer() {
-        val seconds = (timeLeftInMillis / 1000).toInt()
-        binding.timerTextView.text = String.format(Locale.getDefault(), "%02d", seconds)
-    }
-
+*/
     private fun displayQuestion() {
         if (questions.isNotEmpty()) {
-            binding.submitBtn.isEnabled = true
+
             val currentQuestion = questions[currentQuestionIndex]
             binding.questionTxtView.text = currentQuestion.question
 
@@ -132,10 +242,13 @@ class QuizActivity : AppCompatActivity() {
                 radioButton.text = if (index < allOptions.size) allOptions[index] else ""
                 radioButton.visibility = if (index < allOptions.size) View.VISIBLE else View.GONE
             }
+            binding.submitBtn.isEnabled = true
+
         }
     }
 
     private fun checkAnswer() {
+
         val selectedRadioButtonId = binding.answersRadioGroup.checkedRadioButtonId
         if (selectedRadioButtonId == -1) {
             Toast.makeText(this, "Please select an answer", Toast.LENGTH_SHORT).show()
@@ -167,6 +280,30 @@ class QuizActivity : AppCompatActivity() {
         finish()
     }
 
+
+    private fun startTimer() {
+        if (!isQuizActive) {
+            isQuizActive = true
+            timer = object : CountDownTimer(timeLeftInMillis, 1000) {
+                override fun onTick(millisUntilFinished: Long) {
+                    timeLeftInMillis = millisUntilFinished
+                    updateTimer()
+                }
+
+                override fun onFinish() {
+                    endQuiz()
+                }
+            }.start()
+        }
+    }
+
+    private fun updateTimer() {
+        val seconds = (timeLeftInMillis / 1000).toInt()
+        binding.timerTextView.text = String.format(Locale.getDefault(), "%02d", seconds)
+    }
+
+
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putInt("CURRENT_QUESTION_INDEX", currentQuestionIndex)
@@ -177,6 +314,25 @@ class QuizActivity : AppCompatActivity() {
         val gson = Gson()
         val json = gson.toJson(questions)
         outState.putString("QUESTIONS", json)
+    }
+
+    private fun restoreSavedState(savedInstanceState: Bundle) {
+        currentQuestionIndex = savedInstanceState.getInt("CURRENT_QUESTION_INDEX", 0)
+        score = savedInstanceState.getInt("SCORE", 0)
+        timeLeftInMillis = savedInstanceState.getLong("TIME_LEFT_IN_MILLIS", 8000L)
+        isQuizActive = savedInstanceState.getBoolean("IS_QUIZ_ACTIVE", false)
+
+        val gson = Gson()
+        val json = savedInstanceState.getString("QUESTIONS")
+        val type = object : TypeToken<List<Question>>() {}.type
+        questions = gson.fromJson(json, type)
+
+        if (::questions.isInitialized && questions.isNotEmpty()) {
+            displayQuestion()
+            if(!isQuizActive) {
+                startTimer()
+            }
+        }
     }
 
     override fun onPause() {
@@ -190,17 +346,10 @@ class QuizActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (::questions.isInitialized && timeLeftInMillis > 0) {
-            displayQuestion() // Ensure question is displayed
+            displayQuestion()
             if (!isQuizActive) {
-                startTimer() // Restart the timer if the quiz was previously active
+                startTimer()
             }
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (::timer.isInitialized) {
-            timer.cancel()
         }
     }
 }
