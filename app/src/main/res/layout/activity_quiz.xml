@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/app_base"
     android:fillViewport="true">
 
     <LinearLayout
@@ -20,54 +21,85 @@
             android:layout_marginBottom="20dp"
             android:textSize="50sp"
             android:textStyle="bold"
+            android:textColor="@color/white"
             tools:text="30" />
 
+        <!--android:paddingBottom="20dp"-->
         <TextView
             android:id="@+id/question_txtView"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="20dp"
+            android:paddingVertical="12dp"
+            android:background="@drawable/textview_roundedcorners_bg"
+            android:gravity="center"
+            android:textColor="@color/white"
             android:textSize="18sp"
             tools:text="@string/show_questionnaire_str" />
 
         <RadioGroup
             android:id="@+id/answers_radioGroup"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="8dp"
+            android:textAlignment="center"
             android:orientation="vertical"
             android:visibility="gone">
 
             <RadioButton
                 android:id="@+id/rbOptn1"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/radio_btn_bg"
+                android:layout_marginVertical="4dp"
+                android:textAlignment="center"
+                android:textColor="@color/white"
                 tools:text="Option 1" />
 
             <RadioButton
                 android:id="@+id/rbOptn2"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/radio_btn_bg"
+                android:layout_marginVertical="4dp"
+                android:textAlignment="center"
+                android:textColor="@color/white"
                 tools:text="Option 2" />
 
             <RadioButton
                 android:id="@+id/rbOptn3"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/radio_btn_bg"
+                android:layout_marginVertical="4dp"
+                android:textAlignment="center"
+                android:textColor="@color/white"
                 tools:text="Option 3" />
 
             <RadioButton
                 android:id="@+id/rbOptn4"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/radio_btn_bg"
+                android:layout_marginVertical="4dp"
+                android:textAlignment="center"
+                android:textColor="@color/white"
                 tools:text="Option 4" />
         </RadioGroup>
 
-        <Button
+        <TextView
             android:id="@+id/submitBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="@string/submit_answer_str"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:background="@drawable/textview_roundedcorners_bg"
+            android:backgroundTint="@color/app_btn"
+            android:layout_gravity="center"
             android:layout_marginTop="20dp"
-            android:text="@string/submit_answer_str" />
+            android:paddingHorizontal="32dp"
+            android:paddingVertical="12dp"
+            />
 
         <ProgressBar
             android:id="@+id/progressBar"

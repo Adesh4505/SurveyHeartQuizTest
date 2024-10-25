@@ -2,4 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="app_base">#4D0034</color>
+    <color name="app_btn">#93005E</color>
+    <color name="app_qstn">#C00A72</color>
+    <color name="app_answers">#AE0172</color>
+    <color name="app_cardView">#640142</color>
 </resources>

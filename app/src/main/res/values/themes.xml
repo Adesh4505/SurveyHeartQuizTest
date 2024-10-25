@@ -5,5 +5,11 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@color/app_base</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+
     <style name="Theme.SurveyHeartQuizTest" parent="Base.Theme.SurveyHeartQuizTest" />
 </resources>
